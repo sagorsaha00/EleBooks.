@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -17,7 +17,8 @@ import { signOut } from "../../lib/auth-client";
 import { useAuth } from "../../lib/AppContext";
 import { useParams, useRouter, usePathname } from "next/navigation";
 
-export default function HeaderSection() {
+// ১. usePathname() ব্যবহারকারী আসল কম্পোনেন্ট — নাম পরিবর্তন করে "Content" কম্পোনেন্ট বানানো হলো
+function HeaderSectionContent() {
   const router = useRouter();
   const pathname = usePathname();
   const { logout } = useAuth();
@@ -227,5 +228,30 @@ export default function HeaderSection() {
         )}
       </AnimatePresence>
     </header>
+  );
+}
+
+function HeaderSkeleton() {
+  return (
+    <header className="sticky top-0 z-50 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#EFECE6]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between gap-3 h-[60px]">
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="w-9 h-9 bg-[#2D2219] rounded-lg flex items-center justify-center text-[#FDFBF7]">
+            <BookOpen size={18} />
+          </div>
+          <span className="text-lg sm:text-xl font-bold tracking-tight text-[#2D2219]">
+            Ele<span className="text-[#8C6239]">Books</span>.
+          </span>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export default function HeaderSection() {
+  return (
+    <Suspense fallback={<HeaderSkeleton />}>
+      <HeaderSectionContent />
+    </Suspense>
   );
 }

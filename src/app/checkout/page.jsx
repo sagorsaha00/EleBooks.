@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AppContext";
-import useGetEmailByBookId from "../../lib/getData";
+import { useGetEmailByBookId } from "../../lib/getData";
 
 /**
  * Payment action block - initiates the Stripe Checkout session redirect

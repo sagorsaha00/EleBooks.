@@ -12,7 +12,6 @@ export default function EleBooksResponsiveHero() {
 
   const { data } = useSession();
   const userInfo = data?.user;
-  console.log("userinfo", userInfo);
 
   useEffect(() => {
     if (!userInfo) return;
