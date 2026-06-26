@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OverViewSection from "../userDashboardComponent/overViewSection";
 import ReadingListSection from "../userDashboardComponent/readingListSection";
 import WihslistSection from "../userDashboardComponent/wihslistSection";
@@ -10,7 +10,20 @@ import HeaderSection from "../../component/headerSection";
 
 export default function UserDashboard() {
   const [activeMenu, setActiveMenu] = useState("Overview");
-
+  const [data, setData] = useState();
+  useEffect(() => {
+    const userString = localStorage.getItem("library-auth-storage");
+    if (userString) {
+      try {
+        const parsedUser = JSON.parse(userString);
+        if (parsedUser?.user) {
+          setData(parsedUser?.user);
+        }
+      } catch (e) {
+        console.error("Error parsing auth storage", e);
+      }
+    }
+  }, []);
   return (
     <>
       <HeaderSection />
@@ -34,10 +47,10 @@ export default function UserDashboard() {
                 />
               </svg>
             </div>
-            <h3 className="font-bold text-sm text-[#2D2219]">Derek Peters</h3>
-            <p className="text-xs text-gray-400 mb-2">a@b.com</p>
+            <h3 className="font-bold text-sm text-[#2D2219]"> {data?.name}</h3>
+            <p className="text-xs text-gray-400 mb-2">{data?.email}</p>
             <span className="text-[10px] uppercase tracking-widest bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full font-bold">
-              User
+              {data?.role}
             </span>
           </div>
 

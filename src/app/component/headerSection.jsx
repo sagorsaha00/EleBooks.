@@ -105,7 +105,7 @@ function HeaderSectionContent() {
                   className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#2D2219] text-[#FDFBF7] hover:bg-[#423327] transition-all shadow-sm active:scale-95"
                 >
                   <LayoutDashboard size={16} />
-                  <span className="hidden sm:inline">My Dashboard</span>
+                  <span  className="hidden sm:inline">My Dashboard</span>
                   <span className="sm:hidden">Dashboard</span>
                 </button>
               )}

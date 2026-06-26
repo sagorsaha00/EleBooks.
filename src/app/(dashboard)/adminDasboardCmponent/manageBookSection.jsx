@@ -6,6 +6,7 @@ import {
   useUpdateBookStatus,
   useDeleteAdminBook,
 } from "../../../lib/getData";
+import { Trash2, Check, X, Pause, Play } from "lucide-react";
 
 export default function AdminBookDashboard() {
   const { data: books, isLoading, isError } = useAdminBooks();
@@ -24,103 +25,134 @@ export default function AdminBookDashboard() {
     }
   };
 
-  if (isLoading)
+  // Loading State
+  if (isLoading) {
     return (
-      <div className="p-6 text-center text-sm text-gray-500">
-        Loading Admin Dashboard...
+      <div className="min-h-[400px] flex items-center justify-center bg-[#FDFBF7]">
+        <div className="animate-pulse text-[#8C6239] text-sm italic">
+          Loading Global Catalog Engine...
+        </div>
       </div>
     );
-  if (isError)
+  }
+
+  // Error State
+  if (isError) {
     return (
-      <div className="p-6 text-center text-red-500 font-semibold">
-        Error loading book data.
+      <div className="min-h-[400px] flex items-center justify-center bg-[#FDFBF7]">
+        <div className="bg-red-50/60 border border-red-100 text-red-600 p-5 rounded-2xl text-sm font-medium">
+          ⚠️ Error synchronizing global catalog database.
+        </div>
       </div>
     );
+  }
 
   return (
-    <div className="w-full bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-[#2D2219]">
-      <div className="mb-4">
-        <h2 className="text-xl font-serif font-black">
+    <div className="w-full bg-white border border-[#EFECE6] rounded-3xl p-6 sm:p-10 shadow-sm text-[#2D2219]">
+      {/* ─── COMPONENT HEADER ─── */}
+      <div className="mb-8 pb-4 border-b border-[#EFECE6]">
+        <h2 className="text-xl sm:text-2xl font-serif font-black tracking-tight text-[#2D2219]">
           Global Catalog Management
         </h2>
-        <p className="text-xs text-gray-500">
-          Approve new listings or override active status toggles instantly.
+        <p className="text-sm text-gray-400 mt-1">
+          Approve new listings or override active status toggles instantly
+          across the infrastructure.
         </p>
       </div>
 
-      <div className="overflow-x-auto w-full">
-        <table className="table w-full border-separate border-spacing-y-2">
+      {/* ─── DATA TABLE CONTROLLER ─── */}
+      <div className="overflow-x-auto w-full rounded-2xl">
+        <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="text-gray-400 text-xs uppercase tracking-wider border-none">
-              <th className="bg-transparent pl-4">Title</th>
-              <th className="bg-transparent">Author</th>
-              <th className="bg-transparent">Category</th>
-              <th className="bg-transparent">Fee</th>
-              <th className="bg-transparent">Librarian</th>
-              <th className="bg-transparent">Status</th>
-              <th className="bg-transparent text-center">Status Controls</th>
+            <tr className="border-b border-[#EFECE6] text-gray-400 text-xs font-bold uppercase tracking-wider bg-[#FAF5EC]/40">
+              <th className="p-4 pl-6">Title & Author</th>
+              <th className="p-4">Category</th>
+              <th className="p-4">Access Fee</th>
+              <th className="p-4">Librarian</th>
+              <th className="p-4">Status Token</th>
+              <th className="p-4 text-center pr-6">Controls</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-[#EFECE6]/60">
             {books?.map((book) => {
-              // 💡 আপনার ডাটাবেজের ভ্যালু (যেমন: "approved", "pending", "rejected", "unpublish") রিড করা হচ্ছে
               const currentStatus =
                 book.status || book.displayStatus || "pending";
 
               return (
                 <tr
                   key={book._id}
-                  className="hover:bg-gray-50/80 transition-colors text-sm rounded-xl"
+                  className="hover:bg-[#FAF5EC]/20 transition-colors duration-150 text-sm"
                 >
-                  <td className="font-medium p-4 pl-4">{book.title}</td>
-                  <td className="text-gray-500">{book.author}</td>
-                  <td>
-                    <span className="bg-purple-50 text-purple-600 text-xs px-2.5 py-1 rounded-full font-semibold">
+                  {/* Title & Author */}
+                  <td className="p-4 pl-6 max-w-xs">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-[#2D2219] truncate">
+                        {book.title}
+                      </span>
+                      <span className="text-xs text-gray-400 mt-0.5 font-medium">
+                        by {book.author}
+                      </span>
+                    </div>
+                  </td>
+
+                  {/* Category Badge */}
+                  <td className="p-4">
+                    <span className="inline-block bg-[#FAF5EC] text-[#8C6239] border border-[#EFECE6] text-[11px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
                       {book.category}
                     </span>
                   </td>
-                  <td className="font-semibold text-[#8C6239]">
+
+                  {/* Fee */}
+                  <td className="p-4 font-serif font-bold text-[#2D2219]">
                     ${Number(book.fee).toFixed(2)}
                   </td>
-                  <td className="text-gray-500 text-xs">{book.librarian}</td>
 
-                  {/* 🏷️ স্ট্যাটাস ব্যাজ (আপনার ডেটাবেজের ভ্যালু অনুযায়ী ম্যাচ করা) */}
-                  <td>
+                  {/* Librarian */}
+                  <td className="p-4 text-gray-400 text-xs font-medium max-w-[120px] truncate">
+                    {book.librarian || "System Auto"}
+                  </td>
+
+                  {/* Status Badges Matching Custom Architecture */}
+                  <td className="p-4">
                     {(currentStatus === "pending" ||
                       currentStatus === "Pending Approval") && (
-                      <span className="bg-amber-50 text-amber-700 border border-amber-200 text-xs px-2.5 py-1 rounded-md font-medium">
-                        Pending Approval
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-lg">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        Pending
                       </span>
                     )}
                     {(currentStatus === "unpublish" ||
                       currentStatus === "Unpublished") && (
-                      <span className="bg-red-50 text-red-700 border border-red-200 text-xs px-2.5 py-1 rounded-md font-medium">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
                         Unpublished
                       </span>
                     )}
                     {(currentStatus === "approved" ||
                       currentStatus === "Published") && (
-                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-1 rounded-md font-medium">
-                        Approved & Published
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Live & Published
                       </span>
                     )}
                     {currentStatus === "checked_out" && (
-                      <span className="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-2.5 py-1 rounded-md font-medium">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                         Checked Out
                       </span>
                     )}
                     {(currentStatus === "rejected" ||
                       currentStatus === "Rejected") && (
-                      <span className="bg-gray-100 text-gray-700 border border-gray-300 text-xs px-2.5 py-1 rounded-md font-medium">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
                         Rejected
                       </span>
                     )}
                   </td>
 
-                  {/* ⚙️ অ্যাকশন কন্ট্রোল বাটন গ্রুপ */}
-                  <td className="p-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      {/* ১. পেন্ডিং থাকলে Approve এবং Reject বাটন আসবে */}
+                  {/* Elegant Controls Button Matrix */}
+                  <td className="p-4 text-center pr-6">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {/* Conditional Action Render Strategy */}
                       {(currentStatus === "pending" ||
                         currentStatus === "Pending Approval") && (
                         <>
@@ -128,69 +160,58 @@ export default function AdminBookDashboard() {
                             onClick={() =>
                               handleAction(book._id, currentStatus, "approved")
                             }
-                            className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-2.5 py-1.5 rounded-md transition-colors shadow-sm"
+                            className="p-1.5 bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90"
+                            title="Approve & Publish Catalog Entry"
                           >
-                            Approve
+                            <Check size={14} strokeWidth={2.5} />
                           </button>
                           <button
                             onClick={() =>
                               handleAction(book._id, currentStatus, "rejected")
                             }
-                            className="text-xs bg-white border border-red-200 hover:bg-red-50 text-red-600 font-medium px-2.5 py-1.5 rounded-md transition-colors"
+                            className="p-1.5 bg-red-50 border border-red-100 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-all active:scale-90"
+                            title="Reject Entry Request"
                           >
-                            Reject
+                            <X size={14} strokeWidth={2.5} />
                           </button>
                         </>
                       )}
 
-                      {/* ২. যদি অলরেডি "approved" থাকে -> তাহলে Unpublish করার বাটন আসবে */}
                       {(currentStatus === "approved" ||
                         currentStatus === "Published") && (
                         <button
-                          title="Hide/Unpublish book from main catalog"
                           onClick={() =>
                             handleAction(book._id, currentStatus, "unpublish")
                           }
-                          className="text-xs bg-amber-500 hover:bg-amber-600 text-white font-medium px-3 py-1.5 rounded-md transition-colors shadow-sm flex items-center gap-1"
+                          className="flex items-center gap-1 text-[11px] font-bold bg-amber-50 border border-amber-100 text-amber-700 hover:bg-amber-600 hover:text-white px-2.5 py-1.5 rounded-xl transition-all shadow-sm active:scale-90"
+                          title="Unpublish from Storefront"
                         >
-                          ⏸️ Unpublish
+                          <Pause size={12} fill="currentColor" />
+                          Unpublish
                         </button>
                       )}
 
-                      {/* ৩. যদি "unpublish" করা থাকে -> পুনরায় Publish/Approve করার বাটন আসবে */}
                       {(currentStatus === "unpublish" ||
                         currentStatus === "Unpublished") && (
                         <button
-                          title="Relaunch book to main store"
                           onClick={() =>
                             handleAction(book._id, currentStatus, "approved")
                           }
-                          className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3 py-1.5 rounded-md transition-colors shadow-sm flex items-center gap-1"
+                          className="flex items-center gap-1 text-[11px] font-bold bg-[#FAF5EC] border border-[#EFECE6] text-[#8C6239] hover:bg-[#8C6239] hover:text-[#FDFBF7] px-2.5 py-1.5 rounded-xl transition-all shadow-sm active:scale-90"
+                          title="Republish to Active Catalog"
                         >
-                          ▶️ Publish
+                          <Play size={12} fill="currentColor" />
+                          Publish
                         </button>
                       )}
 
-                      {/* ৪. গ্লোবাল ডিলিট বাটন */}
+                      {/* Hard Purge Tool */}
                       <button
-                        title="Delete Permanently From Database"
                         onClick={() => handleDelete(book._id, currentStatus)}
-                        className="p-1.5 bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all ml-2"
+                        className="p-1.5 bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all ml-1 active:scale-90"
+                        title="Delete Permanently From Infrastructure"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.8}
-                          stroke="currentColor"
-                          className="w-4 h-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                          />
-                        </svg>
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>

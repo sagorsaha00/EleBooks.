@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OverView from "./overView";
 import AddBook from "./addBook";
 import ManageInventory from "./manageInventory";
@@ -8,6 +8,20 @@ import ManageDelivery from "./manageDelivery";
 import HeaderSection from "../../component/headerSection";
 export default function LibrarianDashboard() {
   const [activeMenu, setActiveMenu] = useState("Manage Inventory");
+  const [data, setData] = useState();
+  useEffect(() => {
+    const userString = localStorage.getItem("library-auth-storage");
+    if (userString) {
+      try {
+        const parsedUser = JSON.parse(userString);
+        if (parsedUser?.user) {
+          setData(parsedUser?.user);
+        }
+      } catch (e) {
+        console.error("Error parsing auth storage", e);
+      }
+    }
+  }, []);
 
   return (
     <>
@@ -30,14 +44,10 @@ export default function LibrarianDashboard() {
                 />
               </svg>
             </div>
-            <h3 className="font-bold text-sm text-[#2D2219]">
-              James Rodriguez
-            </h3>
-            <p className="text-xs text-gray-400 mb-2">
-              james@heritagebooks.com
-            </p>
+            <h3 className="font-bold text-sm text-[#2D2219]">{data?.name}</h3>
+            <p className="text-xs text-gray-400 mb-2">{data?.email}</p>
             <span className="text-[10px] uppercase tracking-widest bg-[#8C6239]/10 text-[#8C6239] px-2.5 py-0.5 rounded-full font-bold">
-              Librarian
+              {data?.role}
             </span>
           </div>
           <nav className="flex flex-col gap-1.5 ">

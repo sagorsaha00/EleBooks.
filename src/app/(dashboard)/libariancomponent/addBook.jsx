@@ -4,53 +4,56 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AppContext";
-
-const handleAddBookSubmit = async (values, { setSubmitting, resetForm }) => {
-  // 1. Retrieve and parse the user object from localStorage
-  const userString = localStorage.getItem("library-auth-storage")
-  const parsedUser = JSON.parse(userString);
-  const useremail = parsedUser.user.email;
-  console.log(useremail);
-  try {
-    const response = await fetch("http://localhost:3001/books/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-
-      body: JSON.stringify({
-        ...values,
-        useremail,
-      }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      alert("Success: " + data.message);
-      resetForm();
-    } else {
-      alert("Error: " + (data.error || "Failed to submit book"));
-    }
-  } catch (error) {
-    alert("Network error occurred");
-  } finally {
-    setSubmitting(false);
-  }
-};
+// ⚠️ Uploadcare উইজেট ইম্পোর্ট করুন
+import { Widget } from "@uploadcare/react-widget";
 
 export default function AddBook() {
-  const router = useRouter(); 
-  const {   isLoggedIn } = useAuth();
-   if(!isLoggedIn) {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
+
+  if (!isLoggedIn) {
     router.push("/login");
-   }
+  }
+
+  const handleAddBookSubmit = async (values, { setSubmitting, resetForm }) => {
+    const userString = localStorage.getItem("library-auth-storage");
+    let useremail = "";
+    if (userString) {
+      const parsedUser = JSON.parse(userString);
+      useremail = parsedUser?.user?.email || "";
+    }
+
+    try {
+      // 💡 কোনো FormData লাগবে না! একদম সাধারণ JSON রিকোয়েস্ট
+      const response = await fetch("http://localhost:3001/books/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          useremail,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Success: " + data.message);
+        resetForm();
+      } else {
+        alert("Error: " + (data.error || "Failed to submit book"));
+      }
+    } catch (error) {
+      alert("Network error occurred");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="max-w-xl mx-auto py-8 px-4 font-sans text-[#2D2219]">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-serif font-black tracking-tight mb-1">
           Add New Book
         </h1>
-        <p className="text-xs sm:text-sm text-gray-400">
-          Publish a premium digital volume to the global library catalog.
-        </p>
       </div>
 
       <div className="bg-white border border-[#EFECE6] rounded-2xl p-6 sm:p-8 shadow-sm">
@@ -62,7 +65,7 @@ export default function AddBook() {
             fee: "",
             librarian: "",
             date: "",
-            image: "",
+            image: "", // এটি এখন আবার আগের মতো স্ট্রিং ইউআরএল হিসেবেই থাকবে
           }}
           validate={(values) => {
             const errors = {};
@@ -70,8 +73,7 @@ export default function AddBook() {
             if (!values.author) errors.author = "Author name is required";
             if (!values.librarian)
               errors.librarian = "Librarian name is required";
-            if (!values.image)
-              errors.image = "Book cover image URL is required";
+            if (!values.image) errors.image = "Book cover image is required";
             if (!values.fee) {
               errors.fee = "Listing fee is required";
             } else if (isNaN(values.fee) || Number(values.fee) < 0) {
@@ -81,7 +83,7 @@ export default function AddBook() {
           }}
           onSubmit={handleAddBookSubmit}
         >
-          {({ isSubmitting }) => (
+          {({ isSubmitting, setFieldValue, values }) => (
             <Form className="space-y-5">
               {/* Book Title */}
               <div>
@@ -91,13 +93,12 @@ export default function AddBook() {
                 <Field
                   type="text"
                   name="title"
-                  placeholder="e.g. History of Tomorrow"
-                  className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all"
+                  className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] rounded-xl px-4 py-2.5 text-sm outline-none"
                 />
                 <ErrorMessage
                   name="title"
                   component="div"
-                  className="text-red-500 text-xs mt-1 font-medium"
+                  className="text-red-500 text-xs mt-1"
                 />
               </div>
 
@@ -109,17 +110,16 @@ export default function AddBook() {
                 <Field
                   type="text"
                   name="author"
-                  placeholder="e.g. F. Scott Fitzgerald"
-                  className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all"
+                  className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] rounded-xl px-4 py-2.5 text-sm outline-none"
                 />
                 <ErrorMessage
                   name="author"
                   component="div"
-                  className="text-red-500 text-xs mt-1 font-medium"
+                  className="text-red-500 text-xs mt-1"
                 />
               </div>
 
-              {/* Grid System for Category & Fee */}
+              {/* Category & Fee */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C6239] mb-1.5">
@@ -128,13 +128,12 @@ export default function AddBook() {
                   <Field
                     as="select"
                     name="category"
-                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all cursor-pointer"
+                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] rounded-xl px-4 py-2.5 text-sm outline-none"
                   >
                     <option value="History">History</option>
                     <option value="Romance">Romance</option>
                     <option value="Sci-Fi">Sci-Fi</option>
                     <option value="Fiction">Fiction</option>
-                    <option value="Self-Help">Self-Help</option>
                   </Field>
                 </div>
 
@@ -145,36 +144,48 @@ export default function AddBook() {
                   <Field
                     type="text"
                     name="fee"
-                    placeholder="0.00"
-                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all"
+                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] rounded-xl px-4 py-2.5 text-sm outline-none"
                   />
                   <ErrorMessage
                     name="fee"
                     component="div"
-                    className="text-red-500 text-xs mt-1 font-medium"
+                    className="text-red-500 text-xs mt-1"
                   />
                 </div>
               </div>
 
-              {/* Image URL */}
-              <div>
+              {/* ⚠️ Uploadcare Widget Field (CHANGED) */}
+              <div className="uploadcare-wrapper">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C6239] mb-1.5">
-                  Book Cover Image URL
+                  Book Cover Image
                 </label>
-                <Field
-                  type="text"
-                  name="image"
-                  placeholder="https://images.unsplash.com/... or any web link"
-                  className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all"
-                />
-                <ErrorMessage
-                  name="image"
-                  component="div"
-                  className="text-red-500 text-xs mt-1 font-medium"
-                />
+                <div className="p-4 bg-[#FAF5EC] border border-dashed border-[#EFECE6] rounded-xl flex flex-col items-start gap-2">
+                  <Widget
+                    publicKey="8ec1f2b07934a0d1ce95"
+                    id="file"
+                    name="image"
+                    imagesOnly
+                    onChange={(fileInfo) => {
+                      if (fileInfo) {
+                        // সরাসরি ক্লাউড CDN ইউআরএল Formik-এ সেট হয়ে যাবে
+                        setFieldValue("image", fileInfo.cdnUrl);
+                      }
+                    }}
+                  />
+                  {values.image && (
+                    <p className="text-[11px] text-green-600 font-medium mt-1">
+                      ✓ Image uploaded successfully!
+                    </p>
+                  )}
+                  <ErrorMessage
+                    name="image"
+                    component="div"
+                    className="text-red-500 text-xs mt-1"
+                  />
+                </div>
               </div>
 
-              {/* Grid System for Librarian & Date */}
+              {/* Librarian & Date */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C6239] mb-1.5">
@@ -183,13 +194,12 @@ export default function AddBook() {
                   <Field
                     type="text"
                     name="librarian"
-                    placeholder="Sarah Jenkins"
-                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all"
+                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] rounded-xl px-4 py-2.5 text-sm outline-none"
                   />
                   <ErrorMessage
                     name="librarian"
                     component="div"
-                    className="text-red-500 text-xs mt-1 font-medium"
+                    className="text-red-500 text-xs mt-1"
                   />
                 </div>
 
@@ -200,16 +210,15 @@ export default function AddBook() {
                   <Field
                     type="date"
                     name="date"
-                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] focus:border-[#8C6239] focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-gray-500 cursor-pointer"
+                    className="w-full bg-[#FAF5EC] border border-[#EFECE6] rounded-xl px-4 py-2.5 text-sm outline-none text-gray-500"
                   />
                 </div>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#2D2219] hover:bg-[#8C6239] text-[#FDFBF7] py-3 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-sm disabled:opacity-50 mt-2"
+                className="w-full bg-[#2D2219] hover:bg-[#8C6239] text-[#FDFBF7] py-3 rounded-xl font-bold text-xs sm:text-sm transition-all disabled:opacity-50"
               >
                 {isSubmitting ? "Publishing..." : "Publish to Library"}
               </button>

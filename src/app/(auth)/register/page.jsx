@@ -30,8 +30,8 @@ export default function RegisterPage() {
     onSuccess: (data) => {
       console.log("data", data);
       login(data.user); 
-      alert(`Account created successfully as`);
-      router.push("/dashboard");
+      alert(`Account created successfully`);
+      router.push("/");
     },
     onError: (error) => {
       alert(error.message || "Something went wrong.");
@@ -75,7 +75,6 @@ export default function RegisterPage() {
     return errors;
   };
 
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   return (
     <section className="bg-[#FDFBF7] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans text-[#2D2219]">
