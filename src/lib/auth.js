@@ -41,7 +41,7 @@ export const auth = betterAuth({
     baseURL: process.env.BETTER_AUTH_URL,
 
     trustedOrigins: [
-        "http://localhost:3000",
+        "https://ele-books-9vdfvsr5q-sagorsaha00s-projects.vercel.app",
     ],
 
     emailAndPassword: {
