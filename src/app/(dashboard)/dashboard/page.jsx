@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import UserDashboard from "../userDashboardComponent/userDashBoard";
 import LibrarianDashboard from "../libariancomponent/liberyanDashBoard";
@@ -10,7 +9,10 @@ export default function RoleBasedDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUserRole("librarian");
+    const user = JSON.parse(localStorage.getItem("library-auth-storage"))?.user;
+    const role = user?.role;
+    console.log("role", role);
+    setUserRole(role);
     setLoading(false);
   }, []);
 
@@ -23,14 +25,13 @@ export default function RoleBasedDashboard() {
       </div>
     );
   }
+  console.log("userRole",userRole)
 
   switch (userRole) {
     case "admin":
       return <AdminOverview />;
-
     case "librarian":
       return <LibrarianDashboard />;
-
     case "user":
     default:
       return <UserDashboard />;
