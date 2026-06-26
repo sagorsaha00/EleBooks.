@@ -18,7 +18,7 @@ export default function EleBooksResponsiveHero() {
 
     const dataCall = async () => {
       try {
-        const res = await fetch("http://localhost:3001/users/googleSignIn", {
+        const res = await fetch("https://book-appoitment-backend-server.vercel.app/users/googleSignIn", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -21,7 +21,7 @@ export default function GoogleSignInButton() {
             if (session.data?.user) {
               login(session.data?.user);
               const res = await fetch(
-                "http://localhost:3001/users/googleSignIn",
+                "https://book-appoitment-backend-server.vercel.app/users/googleSignIn",
                 {
                   method: "POST",
                   headers: {

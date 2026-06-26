@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useRouter } from "next/navigation";
 import { useAuth } from './AppContext';
-const url = 'http://localhost:3001'
+const url = 'https://book-appoitment-backend-server.vercel.app'
 
 
 
@@ -220,7 +220,7 @@ export function useSingleBook(bookId) {
         queryKey: ["bookDetails", bookId],
         queryFn: async () => {
             if (!bookId) return null;
-            const response = await fetch(`http://localhost:3001/books/details/${bookId}`, {
+            const response = await fetch(`https://book-appoitment-backend-server.vercel.app/books/details/${bookId}`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -286,7 +286,7 @@ export function useLibrarianInventory(librarianEmail) {
         enabled: !!librarianEmail,
         queryFn: async () => {
             const res = await fetch(
-                `http://localhost:3001/books/librarian/books/${librarianEmail}`
+                `https://book-appoitment-backend-server.vercel.app/books/librarian/books/${librarianEmail}`
             );
 
             if (!res.ok) throw new Error("Failed to load inventory");
@@ -301,7 +301,7 @@ export function useTogglePublish() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({ bookId, currentStatus }) => {
-            const res = await fetch(`http://localhost:3001/books/librarian/books/status/${bookId}`, {
+            const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/librarian/books/status/${bookId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ currentStatus }),
@@ -320,7 +320,7 @@ export function useDeleteBook() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (bookId) => {
-            const res = await fetch(`http://localhost:3001/books/librarian/books/${bookId}`, {
+            const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/librarian/books/${bookId}`, {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error("Failed to delete book");
@@ -401,7 +401,7 @@ export function useSalesReportLibarian(email) {
         queryKey: ['usersalesReport', email],
         queryFn: async () => {
             if (!email) return { success: true, salesReport: [] };
-            const response = await fetch(`http://localhost:3001/books/getSalesReport`, {
+            const response = await fetch(`https://book-appoitment-backend-server.vercel.app/books/getSalesReport`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
@@ -467,5 +467,5 @@ export function useGetReadingList(useremail) {
 }
 
 export function getBookData() {
-    
+
 }

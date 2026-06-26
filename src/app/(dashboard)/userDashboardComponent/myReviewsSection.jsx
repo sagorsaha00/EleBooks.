@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession, getSession } from "../../../lib/auth-client";
 
-const url = "http://localhost:3001"; // আপনার ব্যাকএন্ড বেস ইউআরএল
+const url = "https://book-appoitment-backend-server.vercel.app";
 
 export default function MyReviewsSection() {
   const queryClient = useQueryClient();
@@ -14,7 +14,6 @@ export default function MyReviewsSection() {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editText, setEditText] = useState("");
 
-  // localStorage থেকে ইউজারের ইমেইল রিট্রিভ করা হচ্ছে
   const currentUserEmail =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("library-auth-storage"))?.user?.email ||

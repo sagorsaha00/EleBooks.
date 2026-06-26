@@ -5,7 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useLoginMutation } from "../../../lib/getData";
 // import { useAuth } from "../../../lib/AppContext";
 // import { signIn, getSession } from "../../../lib/auth-client";
-import GoogleSignInButton from '../../../../x'
+import GoogleSignInButton from "../../../../x";
 
 // function GoogleSignInButton() {
 //   const { login } = useAuth();
@@ -24,7 +24,7 @@ import GoogleSignInButton from '../../../../x'
 //             if (session.data?.user) {
 //               login(session.data?.user);
 //               const res = await fetch(
-//                 "http://localhost:3001/users/googleSignIn",
+//                 "https://book-appoitment-backend-server.vercel.app/users/googleSignIn",
 //                 {
 //                   method: "POST",
 //                   headers: {

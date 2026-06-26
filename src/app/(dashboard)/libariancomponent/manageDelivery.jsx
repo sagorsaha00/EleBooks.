@@ -24,7 +24,7 @@ export default function ManageDelivery() {
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, nextStatus }) => {
       console.log("info", orderId, nextStatus)
-      const res = await fetch(`http://localhost:3001/libarian/orders/${orderId}/${nextStatus}`, {
+      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/libarian/orders/${orderId}/${nextStatus}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
       });

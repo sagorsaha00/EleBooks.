@@ -19,7 +19,7 @@ function PaymentSection({ bookId, fee, title, userEmail, bookOwnerEmail }) {
 
     try {
       // 1. Call backend endpoint to generate Stripe Checkout URL
-      const response = await fetch("http://localhost:3001/api/checkout", {
+      const response = await fetch("https://book-appoitment-backend-server.vercel.app/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

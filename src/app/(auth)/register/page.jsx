@@ -15,7 +15,7 @@ export default function RegisterPage() {
   // 📡 TanStack Query Mutation ফর রেগুলার রেজিস্ট্রেশন
   const registerMutation = useMutation({
     mutationFn: async (newUser) => {
-      const response = await fetch("http://localhost:3001/users/createUser", {
+      const response = await fetch("https://book-appoitment-backend-server.vercel.app/users/createUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newUser),

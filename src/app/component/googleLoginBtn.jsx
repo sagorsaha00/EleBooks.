@@ -11,7 +11,7 @@ export default function GoogleLoginBtn() {
     const idToken = credentialResponse.credential;
 
     try {
-      const response = await fetch("http://localhost:3001/api/auth/google", {
+      const response = await fetch("https://book-appoitment-backend-server.vercel.app/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: idToken }),

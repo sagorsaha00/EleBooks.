@@ -82,7 +82,7 @@ export default function BookDetailsPage() {
     queryFn: async () => {
       if (!bookId || !currentUser.email) return { hasPurchased: false };
       const res = await fetch(
-        `http://localhost:3001/books/sales/verify?bookId=${bookId}&userEmail=${currentUser.email}`,
+        `https://book-appoitment-backend-server.vercel.app/books/sales/verify?bookId=${bookId}&userEmail=${currentUser.email}`,
       );
       if (!res.ok) return { hasPurchased: false };
       return res.json();
@@ -96,7 +96,7 @@ export default function BookDetailsPage() {
     queryKey: ["comments", bookId],
     queryFn: async () => {
       if (!bookId) return [];
-      const res = await fetch(`http://localhost:3001/books/comments/${bookId}`);
+      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/comments/${bookId}`);
       if (!res.ok) throw new Error("Failed to fetch comments");
       return res.json();
     },
@@ -106,7 +106,7 @@ export default function BookDetailsPage() {
   // ─── MUTATIONS ───
   const commentMutation = useMutation({
     mutationFn: async (commentData) => {
-      const res = await fetch("http://localhost:3001/books/comments", {
+      const res = await fetch("https://book-appoitment-backend-server.vercel.app/books/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(commentData),
@@ -122,7 +122,7 @@ export default function BookDetailsPage() {
 
   const updateBookMutation = useMutation({
     mutationFn: async (updatedData) => {
-      const res = await fetch(`http://localhost:3001/books/update/${bookId}`, {
+      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/update/${bookId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),
@@ -140,7 +140,7 @@ export default function BookDetailsPage() {
 
   const deleteBookMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`http://localhost:3001/books/delete/${bookId}`, {
+      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/delete/${bookId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentStatus: currentBookStatus }),

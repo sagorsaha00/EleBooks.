@@ -38,7 +38,7 @@ function SuccessContent() {
 
         // 1. Verify the Stripe session via your backend gateway
         const verifyResponse = await fetch(
-          `http://localhost:3001/api/checkout/session/${sessionId}`,
+          `https://book-appoitment-backend-server.vercel.app/api/checkout/session/${sessionId}`,
         );
         const verifyData = await verifyResponse.json();
 
@@ -48,7 +48,7 @@ function SuccessContent() {
 
           // 💾 2. Save confirmation context to your local database ledger
           const saveResponse = await fetch(
-            "http://localhost:3001/books/api/checkout/confirm",
+            "https://book-appoitment-backend-server.vercel.app/books/api/checkout/confirm",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

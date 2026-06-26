@@ -10,7 +10,7 @@ export default function TransactionSection() {
 
   useEffect(() => {
     // Fetch data from local API
-    fetch("http://localhost:3001/books/getTransactionId")
+    fetch("https://book-appoitment-backend-server.vercel.app/books/getTransactionId")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

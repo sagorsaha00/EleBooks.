@@ -13,7 +13,7 @@ export default function FeaturedAndCategories() {
     const fetchBooks = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3001/books/getAllBook",
+          "https://book-appoitment-backend-server.vercel.app/books/getAllBook",
         );
         if (response.data.data) {
           console.log("data", response.data.data);

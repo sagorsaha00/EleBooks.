@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 const fetchCategories = async () => {
-  const response = await axios.get("http://localhost:3001/books/allCategory");
+  const response = await axios.get("https://book-appoitment-backend-server.vercel.app/books/allCategory");
   return response.data;
 };
 
