@@ -85,7 +85,6 @@ export default function FeaturedAndCategories() {
                 >
                   <div className="aspect-[3/4] w-full rounded-xl overflow-hidden bg-gray-100 mb-4">
                     <img
-                      
                       src={book.image}
                       alt={book.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

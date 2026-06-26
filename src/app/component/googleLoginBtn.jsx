@@ -5,17 +5,20 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../lib/AppContext";
 
 export default function GoogleLoginBtn() {
-   const {  isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   const handleSuccess = async (credentialResponse) => {
     const idToken = credentialResponse.credential;
 
     try {
-      const response = await fetch("https://book-appoitment-backend-server.vercel.app/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: idToken }),
-      });
+      const response = await fetch(
+        "https://book-appoitment-backend-server.vercel.app/api/auth/google",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: idToken }),
+        },
+      );
 
       const data = await response.json();
 

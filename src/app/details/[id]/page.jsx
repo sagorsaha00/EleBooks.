@@ -96,7 +96,9 @@ export default function BookDetailsPage() {
     queryKey: ["comments", bookId],
     queryFn: async () => {
       if (!bookId) return [];
-      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/comments/${bookId}`);
+      const res = await fetch(
+        `https://book-appoitment-backend-server.vercel.app/books/comments/${bookId}`,
+      );
       if (!res.ok) throw new Error("Failed to fetch comments");
       return res.json();
     },
@@ -106,11 +108,14 @@ export default function BookDetailsPage() {
   // ─── MUTATIONS ───
   const commentMutation = useMutation({
     mutationFn: async (commentData) => {
-      const res = await fetch("https://book-appoitment-backend-server.vercel.app/books/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(commentData),
-      });
+      const res = await fetch(
+        "https://book-appoitment-backend-server.vercel.app/books/comments",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(commentData),
+        },
+      );
       if (!res.ok) throw new Error("Failed to post comment");
       return res.json();
     },
@@ -122,11 +127,14 @@ export default function BookDetailsPage() {
 
   const updateBookMutation = useMutation({
     mutationFn: async (updatedData) => {
-      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/update/${bookId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
-      });
+      const res = await fetch(
+        `https://book-appoitment-backend-server.vercel.app/books/update/${bookId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        },
+      );
       if (!res.ok) throw new Error("Failed to update book details");
       return res.json();
     },
@@ -140,11 +148,14 @@ export default function BookDetailsPage() {
 
   const deleteBookMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/books/delete/${bookId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentStatus: currentBookStatus }),
-      });
+      const res = await fetch(
+        `https://book-appoitment-backend-server.vercel.app/books/delete/${bookId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentStatus: currentBookStatus }),
+        },
+      );
       if (!res.ok) throw new Error("Failed to delete book asset.");
       return res.json();
     },

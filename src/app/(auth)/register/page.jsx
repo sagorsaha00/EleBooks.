@@ -6,7 +6,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "../../../lib/AppContext";
 import { useRouter } from "next/navigation";
-import GoogleSignInButton from "../../../../x"
+import GoogleSignInButton from "../../../../x";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,11 +15,14 @@ export default function RegisterPage() {
   // 📡 TanStack Query Mutation ফর রেগুলার রেজিস্ট্রেশন
   const registerMutation = useMutation({
     mutationFn: async (newUser) => {
-      const response = await fetch("https://book-appoitment-backend-server.vercel.app/users/createUser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newUser),
-      });
+      const response = await fetch(
+        "https://book-appoitment-backend-server.vercel.app/users/createUser",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newUser),
+        },
+      );
 
       const data = await response.json();
       if (!response.ok) {
@@ -29,7 +32,7 @@ export default function RegisterPage() {
     },
     onSuccess: (data) => {
       console.log("data", data);
-      login(data.user); 
+      login(data.user);
       alert(`Account created successfully`);
       router.push("/");
     },
@@ -74,7 +77,6 @@ export default function RegisterPage() {
     }
     return errors;
   };
-
 
   return (
     <section className="bg-[#FDFBF7] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans text-[#2D2219]">

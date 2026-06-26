@@ -7,16 +7,19 @@ export default function BookCard({ book, userEmail }) {
   const handlePayment = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://book-appoitment-backend-server.vercel.app/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookId: book.id,
-          bookTitle: book.title,
-          price: book.price, 
-          userEmail: userEmail,
-        }),
-      });
+      const response = await fetch(
+        "https://book-appoitment-backend-server.vercel.app/api/checkout",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookId: book.id,
+            bookTitle: book.title,
+            price: book.price,
+            userEmail: userEmail,
+          }),
+        },
+      );
 
       const data = await response.json();
 

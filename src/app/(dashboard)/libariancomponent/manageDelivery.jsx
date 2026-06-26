@@ -7,10 +7,10 @@ import { useSalesReportLibarian } from "../../../lib/getData";
 export default function ManageDelivery() {
   const queryClient = useQueryClient();
 
-
   const userEmail =
     typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("library-auth-storage"))?.user?.email || ""
+      ? JSON.parse(localStorage.getItem("library-auth-storage"))?.user?.email ||
+        ""
       : "";
 
   const {
@@ -23,11 +23,14 @@ export default function ManageDelivery() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, nextStatus }) => {
-      console.log("info", orderId, nextStatus)
-      const res = await fetch(`https://book-appoitment-backend-server.vercel.app/libarian/orders/${orderId}/${nextStatus}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-      });
+      console.log("info", orderId, nextStatus);
+      const res = await fetch(
+        `https://book-appoitment-backend-server.vercel.app/libarian/orders/${orderId}/${nextStatus}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
       if (!res.ok) throw new Error(`Failed to change status to ${nextStatus}`);
       return res.json();
     },
@@ -35,23 +38,28 @@ export default function ManageDelivery() {
       queryClient.invalidateQueries({ queryKey: ["sales-report", userEmail] });
     },
     onError: (err) => {
-      alert(err.message || "Something went wrong while updating delivery status.");
+      alert(
+        err.message || "Something went wrong while updating delivery status.",
+      );
     },
   });
 
   const totalDeliveries = userSalesReport.length;
-  
+
   const totalEarnings = userSalesReport.reduce(
     (sum, item) => sum + (item.amount || item.fee || 0),
-    0
+    0,
   );
 
-  const pendingCount = userSalesReport.filter((item) => item.status === "pending").length;
-  const completedCount = userSalesReport.filter((item) => item.status === "completed").length;
+  const pendingCount = userSalesReport.filter(
+    (item) => item.status === "pending",
+  ).length;
+  const completedCount = userSalesReport.filter(
+    (item) => item.status === "completed",
+  ).length;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto font-sans bg-slate-50 text-slate-800 min-h-screen">
-      
       {/* Upper Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-slate-200">
         <div>
@@ -135,7 +143,8 @@ export default function ManageDelivery() {
             No active reports found
           </h3>
           <p className="text-slate-400 text-sm mt-1">
-            There are currently no active delivery pipelines associated with this account.
+            There are currently no active delivery pipelines associated with
+            this account.
           </p>
         </div>
       )}
@@ -166,7 +175,8 @@ export default function ManageDelivery() {
                     </span>
                   </div>
                   <p className="text-xs font-medium text-slate-400 truncate">
-                    Buyer: <span className="text-slate-600">{book.userEmail}</span>
+                    Buyer:{" "}
+                    <span className="text-slate-600">{book.userEmail}</span>
                   </p>
                 </div>
               </div>
@@ -207,14 +217,16 @@ export default function ManageDelivery() {
 
               {/* Right Segment: Status Badge and Actions */}
               <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100 shrink-0 min-w-[200px]">
-                
                 {/* Dynamic Status Badge */}
                 <span
                   className={`px-2.5 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider border ${
-                    currentStatus === "pending" ? "bg-amber-50 border-amber-200 text-amber-700" :
-                    currentStatus === "approved" ? "bg-blue-50 border-blue-200 text-blue-700" :
-                    currentStatus === "dispatched" ? "bg-purple-50 border-purple-200 text-purple-700" :
-                    "bg-emerald-50 border-emerald-200 text-emerald-700"
+                    currentStatus === "pending"
+                      ? "bg-amber-50 border-amber-200 text-amber-700"
+                      : currentStatus === "approved"
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : currentStatus === "dispatched"
+                          ? "bg-purple-50 border-purple-200 text-purple-700"
+                          : "bg-emerald-50 border-emerald-200 text-emerald-700"
                   }`}
                 >
                   {currentStatus}
@@ -224,7 +236,12 @@ export default function ManageDelivery() {
                 <div className="text-right">
                   {currentStatus === "pending" && (
                     <button
-                      onClick={() => updateStatusMutation.mutate({ orderId: book._id, nextStatus: "approve" })}
+                      onClick={() =>
+                        updateStatusMutation.mutate({
+                          orderId: book._id,
+                          nextStatus: "approve",
+                        })
+                      }
                       disabled={updateStatusMutation.isPending}
                       className="bg-[#8C6239] hover:bg-[#734f2d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 disabled:opacity-50"
                     >
@@ -234,7 +251,12 @@ export default function ManageDelivery() {
 
                   {currentStatus === "approved" && (
                     <button
-                      onClick={() => updateStatusMutation.mutate({ orderId: book._id, nextStatus: "dispatch" })}
+                      onClick={() =>
+                        updateStatusMutation.mutate({
+                          orderId: book._id,
+                          nextStatus: "dispatch",
+                        })
+                      }
                       disabled={updateStatusMutation.isPending}
                       className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 disabled:opacity-50"
                     >
@@ -244,7 +266,12 @@ export default function ManageDelivery() {
 
                   {currentStatus === "dispatched" && (
                     <button
-                      onClick={() => updateStatusMutation.mutate({ orderId: book._id, nextStatus: "complete" })}
+                      onClick={() =>
+                        updateStatusMutation.mutate({
+                          orderId: book._id,
+                          nextStatus: "complete",
+                        })
+                      }
                       disabled={updateStatusMutation.isPending}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 disabled:opacity-50"
                     >
@@ -259,7 +286,6 @@ export default function ManageDelivery() {
                   )}
                 </div>
               </div>
-
             </div>
           );
         })}
