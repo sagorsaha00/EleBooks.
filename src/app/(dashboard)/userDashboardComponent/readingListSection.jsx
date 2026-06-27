@@ -15,6 +15,7 @@ export default function ReadingListSection() {
   const { data, isLoading } = useGetReadingList(useremail);
 
   const readingList = data?.message || [];
+  console.log("readingList", readingList);
 
   // loading
   if (isLoading) {

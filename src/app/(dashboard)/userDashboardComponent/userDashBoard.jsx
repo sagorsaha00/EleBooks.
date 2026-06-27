@@ -13,9 +13,11 @@ export default function UserDashboard() {
   const [data, setData] = useState();
   useEffect(() => {
     const userString = localStorage.getItem("library-auth-storage");
+
     if (userString) {
       try {
         const parsedUser = JSON.parse(userString);
+        console.log("parsedUser", parsedUser);
         if (parsedUser?.user) {
           setData(parsedUser?.user);
         }
@@ -151,7 +153,7 @@ export default function UserDashboard() {
               <button
                 key={item.name}
                 onClick={() => setActiveMenu(item.name)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold rounded-xl transition-all ${
+                className={`w-full cursor-pointer flex items-center gap-3 px-4 py-2.5 text-xs font-semibold rounded-xl transition-all ${
                   activeMenu === item.name
                     ? "bg-[#EEEDFC] text-[#5B52E3]"
                     : "text-gray-500 hover:bg-[#FAF5EC] hover:text-[#2D2219]"

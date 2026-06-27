@@ -396,16 +396,21 @@ export function useGetEmailByBookId(bookId) {
 
     });
 }
+export const salesReportKey = (email) => ['usersalesReport', email];
+
 export function useSalesReportLibarian(email) {
     return useQuery({
-        queryKey: ['usersalesReport', email],
+        queryKey: salesReportKey(email),
         queryFn: async () => {
             if (!email) return { success: true, salesReport: [] };
-            const response = await fetch(`https://book-appoitment-backend-server.vercel.app/books/getSalesReport`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
+            const response = await fetch(
+                `https://book-appoitment-backend-server.vercel.app/books/getSalesReport`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                },
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to load sales report");
@@ -413,7 +418,7 @@ export function useSalesReportLibarian(email) {
 
             return response.json();
         },
-        enabled: !!email, // 👈 CRITICAL: This stops the query if email is ""
+        enabled: !!email,
     });
 }
 
@@ -439,8 +444,6 @@ export function useGetCommentSection(email) {
 }
 
 export function useGetReadingList(useremail) {
-    console.log("issemail", useremail);
-
     return useQuery({
         queryKey: ['userReadingList', useremail],
         queryFn: async () => {
@@ -463,9 +466,9 @@ export function useGetReadingList(useremail) {
         },
 
         enabled: !!useremail,
+        refetchInterval: 5000,
+        refetchIntervalInBackground: false,
+        refetchOnWindowFocus: true,
     });
 }
 
-export function getBookData() {
-
-}

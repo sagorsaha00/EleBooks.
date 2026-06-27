@@ -7,6 +7,7 @@ import {
   useSingleBook,
   useToggleWishlist,
   useUpdateBookStatus,
+  useAllSalesReport, // ✅ যুক্ত করা হয়েছে
 } from "@/lib/getData";
 import {
   Trash2,
@@ -33,7 +34,7 @@ export default function BookDetailsPage() {
   // ─── LOCAL STATES FOR REALTIME UI REFLECTION ───
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [currentBookStatus, setCurrentBookStatus] = useState(""); // ✨ রিয়েল-টাইম বাটন ট্র্যাক করার জন্য লোকাল স্টেট
+  const [currentBookStatus, setCurrentBookStatus] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     title: "",
@@ -67,7 +68,7 @@ export default function BookDetailsPage() {
   // ─── SYNC CORE DATA TO LOCAL STATES ───
   useEffect(() => {
     if (book) {
-      setCurrentBookStatus(book.status || "approved"); // সার্ভার থেকে আসা স্ট্যাটাস সিঙ্ক
+      setCurrentBookStatus(book.status || "approved");
       setEditForm({
         title: book.title || "",
         author: book.author || "",
@@ -77,19 +78,14 @@ export default function BookDetailsPage() {
   }, [book]);
 
   // ─── SALES GATE / PURCHASE VERIFICATION ───
-  const { data: purchaseData } = useQuery({
-    queryKey: ["purchase-verify", bookId, currentUser.email],
-    queryFn: async () => {
-      if (!bookId || !currentUser.email) return { hasPurchased: false };
-      const res = await fetch(
-        `https://book-appoitment-backend-server.vercel.app/books/sales/verify?bookId=${bookId}&userEmail=${currentUser.email}`,
-      );
-      if (!res.ok) return { hasPurchased: false };
-      return res.json();
-    },
-    enabled: !!bookId && isLoggedIn && !isLibrarian,
-  });
-  const hasPurchasedBook = purchaseData?.hasPurchased || false;
+  // ✅ FIX: আলাদা ভাঙা "/books/sales/verify" এন্ডপয়েন্টের বদলে
+  // আগে থেকেই কাজ করা useAllSalesReport দিয়ে client-side চেক
+  const { data: PendingData, isLoading: isSalesLoading } = useAllSalesReport();
+  const salesLedgerArray = PendingData?.salesLedger || [];
+
+  const hasPurchasedBook = salesLedgerArray.some(
+    (item) => item?.bookId === bookId && item?.userEmail === currentUser.email,
+  );
 
   // ─── COMMENTS THREAD QUERY ───
   const { data: comments = [], isLoading: commentsLoading } = useQuery({
@@ -203,8 +199,6 @@ export default function BookDetailsPage() {
   const handleToggleUnpublish = () => {
     const previousStatus = currentBookStatus;
     const currentStatusClean = (previousStatus || "approved").toLowerCase();
-
-    // ১. কি অ্যাকশন হবে এবং পরের স্ট্যাটাস কি হবে তা নির্ধারণ
     const nextAction =
       currentStatusClean === "unpublish" || currentStatusClean === "unpublished"
         ? "approved"
@@ -212,21 +206,18 @@ export default function BookDetailsPage() {
     const optimisticStatus =
       nextAction === "unpublish" ? "Unpublished" : "Approved";
 
-    // ২. এপিআই কলের আগেই UI ইনস্ট্যান্ট চেইঞ্জ করার জন্য স্টেট আপডেট
     setCurrentBookStatus(optimisticStatus);
 
     updateStatusMutation.mutate(
       { bookId: book?._id, currentStatus: previousStatus, action: nextAction },
       {
         onSuccess: (res) => {
-          // সার্ভার সাকসেস হলে ক্যাশ ডাটা রিভ্যালিডেট করা হবে
           queryClient.invalidateQueries({ queryKey: ["book", bookId] });
           if (res?.updatedStatus) {
             setCurrentBookStatus(res.updatedStatus);
           }
         },
         onError: (err) => {
-          // এপিআই কল ফেইল করলে স্বয়ংক্রিয়ভাবে আগের স্ট্যাটাসে ব্যাক (Rollback) করবে
           setCurrentBookStatus(previousStatus);
           alert(
             "Server syncing failed. Reverting status. Error: " + err.message,
@@ -240,7 +231,9 @@ export default function BookDetailsPage() {
     currentBookStatus?.toLowerCase() === "unpublish" ||
     currentBookStatus?.toLowerCase() === "unpublished";
 
-  if (!mounted || isLoading) {
+  // ✅ sales report লোড হওয়া পর্যন্ত wait করানো হচ্ছে,
+  // যাতে hasPurchasedBook ভুলভাবে false অবস্থায় lock না দেখায়
+  if (!mounted || isLoading || isSalesLoading) {
     return (
       <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
         <div className="animate-pulse text-[#8C6239] text-sm italic">
@@ -358,7 +351,6 @@ export default function BookDetailsPage() {
             {/* Right Block: Content Data OR Boxed Responsive Edit Component */}
             <div className="w-full md:w-3/5 flex flex-col justify-between">
               {isEditing ? (
-                /* 📦 FULLY RESPONSIVE BOXED EDIT INTERFACE (MATCHES MAIN LAYOUT) 📦 */
                 <div className="bg-[#FAF5EC]/50 border border-[#EFECE6] rounded-2xl p-5 sm:p-8 shadow-inner h-full flex flex-col justify-between w-full">
                   <form
                     onSubmit={handleUpdateSubmit}
@@ -433,7 +425,6 @@ export default function BookDetailsPage() {
                   </form>
                 </div>
               ) : (
-                /* NORMAL VIEW INTERFACE */
                 <div className="flex flex-col justify-between h-full">
                   <div>
                     <span className="inline-block bg-[#FAF5EC] border border-[#EFECE6] text-[10px] font-bold text-[#8C6239] px-3 py-1 rounded-md uppercase tracking-wider mb-4">
@@ -493,11 +484,18 @@ export default function BookDetailsPage() {
                       <div className="flex-1 max-w-xs w-full">
                         <button
                           onClick={handleRequestDelivery}
-                          className="w-full bg-[#8C6239] hover:bg-[#734f2d] text-[#FDFBF7] font-semibold text-sm py-3 px-5 rounded-xl transition-all"
+                          disabled={hasPurchasedBook}
+                          className={`w-full font-semibold text-sm py-3 px-5 rounded-xl transition-all ${
+                            hasPurchasedBook
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-[#8C6239] hover:bg-[#734f2d] text-[#FDFBF7]"
+                          }`}
                         >
-                          {isLoggedIn
-                            ? "Request Delivery"
-                            : "Sign In to Request"}
+                          {hasPurchasedBook
+                            ? "Already Purchased"
+                            : isLoggedIn
+                              ? "Request Delivery"
+                              : "Sign In to Request"}
                         </button>
                       </div>
                     )}

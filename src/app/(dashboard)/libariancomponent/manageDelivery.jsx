@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { useSalesReportLibarian } from "../../../lib/getData";
+import { useSalesReportLibarian, salesReportKey } from "../../../lib/getData";
 
 export default function ManageDelivery() {
   const queryClient = useQueryClient();
@@ -23,7 +23,6 @@ export default function ManageDelivery() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, nextStatus }) => {
-      console.log("info", orderId, nextStatus);
       const res = await fetch(
         `https://book-appoitment-backend-server.vercel.app/libarian/orders/${orderId}/${nextStatus}`,
         {
@@ -35,7 +34,7 @@ export default function ManageDelivery() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sales-report", userEmail] });
+      queryClient.invalidateQueries({ queryKey: salesReportKey(userEmail) });
     },
     onError: (err) => {
       alert(
