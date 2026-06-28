@@ -158,7 +158,7 @@ export default function OurBestsellers() {
       {status === "ready" && books.length > 0 && (
         <div className="flex justify-center mt-10">
           <button
-            onClick={() => router.push("/books")}
+            onClick={() => router.push("/bookssection")}
             className="group inline-flex items-center gap-2 text-sm sm:text-base font-semibold text-[#8C6239] hover:text-[#2D2219] transition-colors duration-300"
           >
             <span>View All Books</span>
