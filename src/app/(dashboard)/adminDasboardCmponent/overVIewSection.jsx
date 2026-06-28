@@ -25,7 +25,7 @@ export default function AdminDashboard() {
   const salesLedger = salesData?.salesLedger || [];
 
   // ✅ derived values (safe + memoized)
-  const totalTransactions = salesData?.totalData ?? salesLedger.length;
+  const totalTransactions = salesData?.totalData ?? salesLedger?.length;
 
   const totalAmount = useMemo(() => {
     return salesLedger.reduce((sum, item) => sum + (item.amount || 0), 0);
