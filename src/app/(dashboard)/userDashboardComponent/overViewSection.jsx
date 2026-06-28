@@ -25,12 +25,7 @@ export default function OverViewSection() {
   }, []);
 
   const { data: PendingData, isLoading: isSalesLoading } = useAllSalesReport();
-  console.log("PendingData", PendingData.salesLedger);
   const salesLedgerArray = PendingData?.salesLedger || [];
-
-  console.log("DEBUG userEmail:", userEmail);
-  console.log("DEBUG salesLedgerArray length:", salesLedgerArray.length);
-
   const userAllOrders = salesLedgerArray.filter(
     (item) => item?.userEmail === userEmail,
   );
