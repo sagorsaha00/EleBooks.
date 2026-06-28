@@ -12,10 +12,11 @@ const fetchFeaturedBooks = async () => {
     "https://book-appoitment-backend-server.vercel.app/books/getAllBook",
   );
   const allBooks = response.data?.data || [];
-  const allVisibleBooks = (allBooks || []).filter(
-    (book) => book.status !== "Unpublished",
-  );
-  return allVisibleBooks.slice(0, 4);
+
+  // Hide anything not actually published, regardless of displayStatus.
+  const visibleBooks = allBooks.filter((book) => book.status !== "Unpublished");
+
+  return visibleBooks.slice(0, 4);
 };
 
 export default function FeaturedAndCategories() {
@@ -27,7 +28,8 @@ export default function FeaturedAndCategories() {
     queryKey: ["featured-books"],
     queryFn: fetchFeaturedBooks,
   });
-  console.log("books", books);
+
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
