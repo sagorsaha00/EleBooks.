@@ -1,30 +1,50 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles, ArrowRight, BookOpen } from "lucide-react";
 import HeaderSection from "./headerSection";
 import { useSession } from "../../lib/auth-client";
+import { useRouter } from "next/navigation";
+
+const SLIDES = [
+  {
+    eyebrow: "Now Delivering Citywide",
+    heading: "Your Local Library, Delivered",
+  },
+  {
+    eyebrow: "50,000+ Titles On Tap",
+    heading: "Every Genre, One Doorstep",
+  },
+  {
+    eyebrow: "Free For Cardholders",
+    heading: "Skip The Trip",
+  }
+];
 
 export default function EleBooksResponsiveHero() {
   const headingRef = useRef(null);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   const { data } = useSession();
   const userInfo = data?.user;
+  const router = useRouter();
 
   useEffect(() => {
     if (!userInfo) return;
-
     const dataCall = async () => {
       try {
-        const res = await fetch("https://book-appoitment-backend-server.vercel.app/users/googleSignIn", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const res = await fetch(
+          "https://book-appoitment-backend-server.vercel.app/users/googleSignIn",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userInfo),
           },
-          body: JSON.stringify(userInfo),
-        });
+        );
 
         const result = await res.json();
         console.log(result);
@@ -36,34 +56,43 @@ export default function EleBooksResponsiveHero() {
     dataCall();
   }, [userInfo]);
 
+  // Auto-advance the slider
   useEffect(() => {
-    if (headingRef.current) {
-      const text = headingRef.current.innerText;
-      const words = text.split(" ");
-
-      headingRef.current.innerHTML = "";
-
-      words.forEach((word) => {
-        const span = document.createElement("span");
-
-        span.innerText = word + " ";
-        span.style.display = "inline-block";
-        span.style.opacity = "0";
-        span.style.transform = "translateY(25px)";
-
-        headingRef.current.appendChild(span);
-      });
-
-      gsap.to(headingRef.current.children, {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        stagger: 0.08,
-        ease: "power3.out",
-        delay: 0.1,
-      });
-    }
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % SLIDES.length);
+    }, 5500);
+    return () => clearInterval(interval);
   }, []);
+
+  
+  useEffect(() => {
+    if (!headingRef.current) return;
+
+    const text = headingRef.current.innerText;
+    const words = text.split(" ");
+
+    headingRef.current.innerHTML = "";
+
+    words.forEach((word) => {
+      const span = document.createElement("span");
+
+      span.innerText = word + " ";
+      span.style.display = "inline-block";
+      span.style.opacity = "0";
+      span.style.transform = "translateY(25px)";
+
+      headingRef.current.appendChild(span);
+    });
+
+    gsap.to(headingRef.current.children, {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      stagger: 0.08,
+      ease: "power3.out",
+      delay: 0.1,
+    });
+  }, [activeSlide]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -90,7 +119,9 @@ export default function EleBooksResponsiveHero() {
       },
     },
   };
-
+  const handlepush = () => {
+    router.push("/bookssection");
+  };
   const galleryImages = [
     {
       src: "https://demo.assets.templately.com/woo/elementor/9/2024/03/cac54461-eb-skew-img-1.png",
@@ -110,6 +141,12 @@ export default function EleBooksResponsiveHero() {
     },
   ];
 
+  // Pairs each text slide with one gallery image, so the photo grid
+  // highlights in sync with whichever slide is active.
+  const featuredIndex = activeSlide % galleryImages.length;
+
+  const slide = SLIDES[activeSlide];
+
   return (
     <div className="overflow-x-hidden bg-[#FDFBF7] text-[#2D2219] font-sans antialiased selection:bg-[#E6D5C3]">
       {/* HEADER */}
@@ -127,79 +164,130 @@ export default function EleBooksResponsiveHero() {
   overflow-hidden
 "
       >
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="
-            inline-flex items-center gap-1.5
-            bg-[#E6D5C3]/40
-            text-[#8C6239]
-            rounded-full
-            text-[11px] sm:text-xs
-            font-semibold
-            uppercase
-            tracking-wider
-            mb-6
-          "
-        >
-          <Sparkles size={12} />
-          <span>The Definitive Digital Collection 📚</span>
-        </motion.div>
+        {/* Slider */}
+        <div className="relative max-w-3xl mx-auto mb-10 sm:mb-14">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              {/* Eyebrow badge */}
+              <div
+                className="
+                  inline-flex items-center gap-1.5
+                  bg-[#E6D5C3]/40
+                  text-[#8C6239]
+                  rounded-full
+                  px-3 py-1
+                  text-[11px] sm:text-xs
+                  font-semibold
+                  uppercase
+                  tracking-wider
+                  mb-6
+                "
+              >
+                <Sparkles size={12} />
+                <span>{slide.eyebrow}</span>
+              </div>
 
-        {/* Search */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="
-            flex items-center
-            w-full
-            max-w-2xl
-            mx-auto
-            bg-white
-            border border-[#EFECE6]
-            shadow-md
-            rounded-2xl
-            p-2
-            mb-16 sm:mb-24
-          "
-        >
-          <input
-            type="text"
-            placeholder="Search Your Next Volume..."
-            className="
-              flex-1
-              min-w-0
-              px-3 sm:px-5
-              py-3
-              text-sm sm:text-base
-              text-[#2D2219]
-              placeholder-gray-400
-              bg-transparent
-              focus:outline-none
-            "
-          />
+              {/* Headline (word-stagger animated via gsap) */}
+              <h1
+                ref={headingRef}
+                className="
+                  text-3xl sm:text-4xl md:text-5xl lg:text-6xl
+                  font-bold
+                  leading-tight
+                  tracking-tight
+                  mb-4
+                  px-2
+                "
+              >
+                {slide.heading}
+              </h1>
 
-          <button
-            className="
-              shrink-0
-              bg-[#8C6239]
-              hover:bg-[#2D2219]
-              text-white
-              p-3 sm:px-5
-              rounded-xl
-              transition-all
-              duration-300
-              flex items-center justify-center
-              shadow-sm
-            "
+              {/* Supporting copy */}
+              <p
+                className="
+                  text-sm sm:text-base md:text-lg
+                  text-[#5C4A3A]
+                  max-w-xl
+                  mx-auto
+                  mb-8
+                  px-2
+                "
+              >
+                {slide.body}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex justify-center mb-8"
           >
-            <Search size={18} />
-          </button>
-        </motion.div>
+            <button
+              onClick={handlepush}
+              className="
+                group
+                cursor-pointer
+                inline-flex items-center gap-2
+                bg-[#8C6239]
+                hover:bg-[#2D2219]
+                text-white
+                font-semibold
+                text-sm sm:text-base
+                px-6 sm:px-8
+                py-3 sm:py-3.5
+                rounded-xl
+                transition-all
+                duration-300
+                shadow-md
+                hover:shadow-lg
+              "
+            >
+              <BookOpen size={18} />
+              <span>Browse Books</span>
+              <ArrowRight
+                size={16}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </button>
+          </motion.div>
 
-        {/* Gallery */}
+          {/* Slide indicators */}
+          <div className="flex items-center justify-center gap-2">
+            {SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveSlide(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className="
+                  group
+                  py-2
+                  px-1
+                "
+              >
+                <span
+                  className={`
+                    block h-1.5 rounded-full transition-all duration-300
+                    ${
+                      i === activeSlide
+                        ? "w-8 bg-[#8C6239]"
+                        : "w-3 bg-[#E6D5C3] group-hover:bg-[#D8C3A8]"
+                    }
+                  `}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -215,33 +303,58 @@ export default function EleBooksResponsiveHero() {
             items-center
           "
         >
-          {galleryImages.map((book, index) => (
-            <motion.div
-              key={index}
-              variants={cardVariants}
-              whileHover={{ y: -6 }}
-              className={`
-                relative
-                rounded-[1.5rem]
-                overflow-hidden
-                shadow-xl
-                border-4 border-white
-                bg-gray-100
-                aspect-[3/4]
-                sm:aspect-[3/5]
-                ${book.isUp ? "md:-translate-y-10" : "md:translate-y-10"}
-              `}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent z-10" />
+          {galleryImages.map((book, index) => {
+            const isFeatured = index === featuredIndex;
 
-              <img
-                src={book.src}
-                alt={`Premium Book ${index + 1}`}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </motion.div>
-          ))}
+            return (
+              <motion.div
+                key={index}
+                variants={cardVariants}
+                animate={{
+                  scale: isFeatured ? 1.06 : 1,
+                  opacity: isFeatured ? 1 : 0.55,
+                }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                whileHover={{
+                  y: -6,
+                  scale: isFeatured ? 1.08 : 1.02,
+                  opacity: 1,
+                }}
+                className={`
+                  relative
+                  rounded-[1.5rem]
+                  overflow-hidden
+                  shadow-xl
+                  border-4
+                  bg-gray-100
+                  aspect-[3/4]
+                  sm:aspect-[3/5]
+                  z-0
+                  ${isFeatured ? "border-[#8C6239] shadow-2xl z-10" : "border-white"}
+                  ${book.isUp ? "md:-translate-y-10" : "md:translate-y-10"}
+                `}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent z-10" />
+
+                {isFeatured && (
+                  <motion.div
+                    layoutId="gallery-glow"
+                    className="absolute inset-0 ring-4 ring-[#8C6239]/40 rounded-[1.5rem] z-20 pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                  />
+                )}
+
+                <img
+                  src={book.src}
+                  alt={`Premium Book ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </motion.div>
+            );
+          })}
         </motion.div>
 
         {/* Features */}

@@ -7,7 +7,7 @@ import HeaderSection from "../component/headerSection";
 import AttractivePremiumFooter from "../component/footerSection";
 import Link from "next/link";
 
-// ১. মূল কন্টেন্ট ও লজিককে আলাদা সাব-কম্পোনেন্টে নিয়ে আসা হলো
+// ১. মূল কন্টেন্ট ও লজিককে আলাদা সাব-কম্পোনেন্টে নিয়ে আসা হলো
 function BooksFilterContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -77,18 +77,43 @@ function BooksFilterContent() {
   }, [queryCategory]);
 
   // ─── Fetch Data ───
+  // NOTE: We fetch a larger batch from the server (not just 8 at a time).
+  // Reason: we filter out "Unpublished" books client-side below, so if we
+  // paginated using the server's page math directly, page numbers would
+  // no longer line up with what's actually visible (e.g. clicking "page 2"
+  // could show 0 new books or repeat books already seen on page 1).
+  // Fetching a bigger pool and paginating client-side keeps page numbers
+  // and book counts consistent with each other.
+  const serverFetchLimit = 200;
   const { data, isLoading, isFetching, isError } = useGetAllApprovedBooks({
     search: debouncedFilters.search,
     minFee: debouncedFilters.minFee,
     maxFee: debouncedFilters.maxFee,
     sortBy,
     category: activeCategory,
-    page: currentPage,
-    limit: booksPerPage,
+    page: 1,
+    limit: serverFetchLimit,
   });
 
-  const books = data?.books || [];
-  const pagination = data?.pagination || { totalPages: 1, currentPage: 1 };
+  // Hide anything not actually published, regardless of displayStatus.
+  // The API's "approved" endpoint can still include items whose true
+  // status is "Unpublished", so we filter those out before paginating.
+  const allVisibleBooks = (data?.books || []).filter(
+    (book) => book.status !== "Unpublished",
+  );
+
+  // Client-side pagination over the already-filtered list, so totalPages
+  // always matches the books we actually have to show.
+  const totalPages = Math.max(
+    1,
+    Math.ceil(allVisibleBooks.length / booksPerPage),
+  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const books = allVisibleBooks.slice(
+    (safeCurrentPage - 1) * booksPerPage,
+    safeCurrentPage * booksPerPage,
+  );
+  const pagination = { totalPages, currentPage: safeCurrentPage };
 
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
@@ -107,6 +132,31 @@ function BooksFilterContent() {
     searchQuery !== debouncedFilters.search ||
     minFee !== debouncedFilters.minFee ||
     maxFee !== debouncedFilters.maxFee;
+
+  // Builds a compact list of page numbers with "..." gaps, e.g.
+  // [1, 2, 3, "...", 8] instead of rendering every page button.
+  const getPageNumbers = (current, total) => {
+    const pages = [];
+    const windowSize = 1; // pages shown on either side of current
+
+    const start = Math.max(2, current - windowSize);
+    const end = Math.min(total - 1, current + windowSize);
+
+    pages.push(1);
+    if (start > 2) pages.push("ellipsis-start");
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < total - 1) pages.push("ellipsis-end");
+    if (total > 1) pages.push(total);
+
+    return pages;
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    document
+      .getElementById("book-explore")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   if (isLoading && !data)
     return (
@@ -147,7 +197,6 @@ function BooksFilterContent() {
         )}
       </div>
 
-      {/* ─── ADVANCED FILTER PANEL ─── */}
       <div className="bg-white border border-[#EFECE6] p-6 rounded-2xl shadow-sm mb-10 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -205,7 +254,6 @@ function BooksFilterContent() {
         </div>
       </div>
 
-      {/* ─── CATEGORY BADGES ─── */}
       <div className="flex flex-wrap justify-center items-center gap-2 mb-12">
         {categories.map((category) => (
           <button
@@ -267,22 +315,43 @@ function BooksFilterContent() {
 
       {/* ─── SERVER-SIDE PAGINATION ─── */}
       {pagination.totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-12 border-t border-[#EFECE6] pt-6">
+        <div className="flex justify-center items-center gap-2 mt-12 border-t border-[#EFECE6] pt-6 flex-wrap">
           <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
             disabled={currentPage === 1}
             className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-[#EFECE6] disabled:opacity-40 transition-colors hover:bg-[#FAF5EC] cursor-pointer"
           >
             Prev
           </button>
-          <span className="text-xs font-medium text-gray-500">
-            Page {pagination.currentPage} of {pagination.totalPages}
-          </span>
+
+          {getPageNumbers(pagination.currentPage, pagination.totalPages).map(
+            (page, idx) =>
+              typeof page === "number" ? (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  disabled={page === pagination.currentPage}
+                  className={`min-w-[32px] px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
+                    page === pagination.currentPage
+                      ? "bg-[#8C6239] border-[#8C6239] text-[#FDFBF7] cursor-default"
+                      : "bg-white border-[#EFECE6] text-[#2D2219] hover:bg-[#FAF5EC]"
+                  }`}
+                >
+                  {page}
+                </button>
+              ) : (
+                <span
+                  key={`${page}-${idx}`}
+                  className="px-1 text-xs text-gray-400 select-none"
+                >
+                  …
+                </span>
+              ),
+          )}
+
           <button
             onClick={() =>
-              setCurrentPage((prev) =>
-                Math.min(prev + 1, pagination.totalPages),
-              )
+              handlePageChange(Math.min(currentPage + 1, pagination.totalPages))
             }
             disabled={currentPage === pagination.totalPages}
             className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-[#EFECE6] disabled:opacity-40 transition-colors hover:bg-[#FAF5EC] cursor-pointer"

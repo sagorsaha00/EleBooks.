@@ -18,7 +18,7 @@ export default function OverViewSection() {
           : "";
       console.log("currentUserEmail", currentUserEmail);
       setUserEmail(currentUserEmail);
-      setIsSessionLoading(false); // ✅ session load শেষ
+      setIsSessionLoading(false);
     };
 
     loadSession();

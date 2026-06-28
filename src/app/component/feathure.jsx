@@ -1,35 +1,33 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import CategoriesSection from "./categoriesSection";
 import { Star, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
 
+const fetchFeaturedBooks = async () => {
+  const response = await axios.get(
+    "https://book-appoitment-backend-server.vercel.app/books/getAllBook",
+  );
+  const allBooks = response.data?.data || [];
+  const allVisibleBooks = (allBooks || []).filter(
+    (book) => book.status !== "Unpublished",
+  );
+  return allVisibleBooks.slice(0, 4);
+};
+
 export default function FeaturedAndCategories() {
-  const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await axios.get(
-          "https://book-appoitment-backend-server.vercel.app/books/getAllBook",
-        );
-        if (response.data.data) {
-          console.log("data", response.data.data);
-          setBooks(response.data.data.slice(0, 4));
-        }
-      } catch (error) {
-        console.error("Error fetching books from backend:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, []);
-
-  // Animation variants
+  const {
+    data: books = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["featured-books"],
+    queryFn: fetchFeaturedBooks,
+  });
+  console.log("books", books);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -60,11 +58,30 @@ export default function FeaturedAndCategories() {
             <ArrowRight size={16} />
           </Link>
         </div>
-        {loading ? (
-          <div className="text-center py-10 font-medium text-gray-500">
-            Loading books...
+
+        {isLoading && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {[...Array(4)].map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-[#EFECE6] rounded-2xl p-3 sm:p-4 shadow-sm animate-pulse"
+              >
+                <div className="aspect-[3/4] w-full rounded-xl bg-[#EFECE6] mb-4" />
+                <div className="h-3 bg-[#EFECE6] rounded mb-2 w-3/4 mx-auto" />
+                <div className="h-2.5 bg-[#EFECE6] rounded mb-2 w-1/2 mx-auto" />
+                <div className="h-3 bg-[#EFECE6] rounded w-1/3 mx-auto" />
+              </div>
+            ))}
           </div>
-        ) : (
+        )}
+
+        {isError && (
+          <p className="text-center py-10 text-sm text-[#8C6239]">
+            Couldn't load featured books right now. Please try again shortly.
+          </p>
+        )}
+
+        {!isLoading && !isError && (
           <motion.div
             variants={containerVariants}
             initial="hidden"

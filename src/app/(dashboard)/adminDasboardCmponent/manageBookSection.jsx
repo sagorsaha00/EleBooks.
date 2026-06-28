@@ -13,7 +13,6 @@ export default function AdminBookDashboard() {
   const updateStatusMutation = useUpdateBookStatus();
   const deleteMutation = useDeleteAdminBook();
 
-  // 🔄 স্ট্যাটাস চেঞ্জ হ্যান্ডেলার
   const handleAction = (bookId, currentStatus, actionType) => {
     updateStatusMutation.mutate({ bookId, currentStatus, action: actionType });
   };
