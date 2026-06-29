@@ -20,7 +20,7 @@ const SLIDES = [
   {
     eyebrow: "Free For Cardholders",
     heading: "Skip The Trip",
-  }
+  },
 ];
 
 export default function EleBooksResponsiveHero() {
@@ -64,7 +64,6 @@ export default function EleBooksResponsiveHero() {
     return () => clearInterval(interval);
   }, []);
 
-  
   useEffect(() => {
     if (!headingRef.current) return;
 

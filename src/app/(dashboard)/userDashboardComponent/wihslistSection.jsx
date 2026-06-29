@@ -19,6 +19,9 @@ export default function WishlistPage() {
   const { data: wishlistResponse = {}, isLoading } =
     useGetUserWishlist(userEmail);
 
+  // Fallback to [] so .length/.map never run on undefined.
+  // (Without `|| []`, wishlistData is undefined until the API responds,
+  // and undefined.length throws — which silently breaks rendering.)
   const wishlistData = wishlistResponse?.wishlist || [];
 
   // ✅ mutation
@@ -37,6 +40,23 @@ export default function WishlistPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         Loading...
+      </div>
+    );
+  }
+
+  // ✅ empty state (fixed: "lenght" -> "length")
+  if (wishlistData.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] px-4">
+        <div className="text-center">
+          <p className="text-4xl mb-3">📚</p>
+          <h2 className="text-lg font-semibold text-[#2D2219] mb-1">
+            Your wishlist is empty
+          </h2>
+          <p className="text-sm text-gray-500">
+            Browse the library and tap the heart on a book to save it here.
+          </p>
+        </div>
       </div>
     );
   }
